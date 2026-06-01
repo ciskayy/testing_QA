@@ -30,6 +30,7 @@ class TestRegisterAllure:
             expected = row["expected"]
             message = page.get_message()
             alert_text = page.get_alert_text_if_exists()
+            has_invalid_field = page.has_invalid_field()
 
             allure.attach(
                 driver.get_screenshot_as_png(),
@@ -37,23 +38,35 @@ class TestRegisterAllure:
                 attachment_type=allure.attachment_type.PNG
             )
 
+            allure.attach(
+                f"Expected: {expected}\n"
+                f"Message: {message}\n"
+                f"Alert: {alert_text}\n"
+                f"Has Invalid Field: {has_invalid_field}",
+                name="actual_result",
+                attachment_type=allure.attachment_type.TEXT
+            )
+
         with allure.step("Verifikasi hasil testing"):
             if expected == "PASS":
                 assert (
                     "User Registered Successfully" in alert_text
                     or "Please verify reCaptcha to register!" in message
-                    or message != ""
+                    or not has_invalid_field
                 ), (
-                    f"Registrasi valid seharusnya berhasil atau tertahan reCaptcha. "
-                    f"Alert: {alert_text}, Message: {message}"
+                    f"Registrasi valid seharusnya berhasil, tertahan reCaptcha, "
+                    f"atau minimal tidak memiliki field invalid. "
+                    f"Alert: {alert_text}, Message: {message}, "
+                    f"Has Invalid Field: {has_invalid_field}"
                 )
 
             else:
                 assert (
-                    page.has_invalid_field()
+                    has_invalid_field
                     or message != ""
                     or "Please verify reCaptcha to register!" in message
                 ), (
                     f"Registrasi invalid seharusnya gagal. "
-                    f"Alert: {alert_text}, Message: {message}"
+                    f"Alert: {alert_text}, Message: {message}, "
+                    f"Has Invalid Field: {has_invalid_field}"
                 )
