@@ -1,4 +1,0 @@
-Expected: PASS
-Message: Please verify reCaptcha to register!
-Alert: 
-Has Invalid Field: True
