@@ -1,0 +1,9 @@
+first_name,last_name,username,password,expected,description
+Ciskayy,Keju,ciskayyvalid001,Ciskayy123!,PASS,Registrasi valid
+,Keju,ciskayy002,Ciskayy123!,FAIL,First name kosong
+Ciskayy,Keju,,Ciskayy123!,FAIL,Username kosong
+Ciskayy,Keju,ciskayy004,,FAIL,Password kosong
+Ciskayy,Keju,ciskayy005,Abc12!,FAIL,Password terlalu pendek
+Ciskayy,Keju,ciskayy006,Abc123!@,PASS,Password batas minimum valid
+Ciskayy,,ciskayy007,Ciskayy123!,FAIL,Last name kosong
+Ciskayy,Keju,ciskayyvalid001,Ciskayy123!,FAIL,Username sudah dipakai
