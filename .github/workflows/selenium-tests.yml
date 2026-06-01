@@ -2,7 +2,7 @@ name: Selenium QA Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -31,7 +31,7 @@ jobs:
 
       - name: Run Selenium Tests with Allure
         run: |
-          python -m pytest tests/test_register_allure.py --alluredir=reports/allure-results -v
+          python -m pytest tests/test_ecommerce_flow.py --alluredir=reports/allure-results -v
 
       - name: Upload Allure Results
         if: always()
