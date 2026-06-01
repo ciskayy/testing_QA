@@ -1,7 +1,8 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 from pages.base_page import BasePage
+import time
 
 
 class RegisterPage(BasePage):
@@ -25,24 +26,53 @@ class RegisterPage(BasePage):
         self.type(self.USERNAME, username)
         self.type(self.PASSWORD, password)
 
-        button = self.find(self.REGISTER_BUTTON)
+        self.click_register_button()
 
-        # Scroll tombol ke tengah layar agar tidak ketutup footer
-        self.driver.execute_script(
-            "arguments[0].scrollIntoView({block: 'center'});",
-            button
+    def click_register_button(self):
+        for attempt in range(3):
+            try:
+                button = self.wait.until(
+                    EC.presence_of_element_located(self.REGISTER_BUTTON)
+                )
+
+                self.driver.execute_script(
+                    "arguments[0].scrollIntoView({block: 'center'});",
+                    button
+                )
+
+                time.sleep(0.5)
+
+                button = self.wait.until(
+                    EC.presence_of_element_located(self.REGISTER_BUTTON)
+                )
+
+                self.driver.execute_script("arguments[0].click();", button)
+                return
+
+            except StaleElementReferenceException:
+                time.sleep(1)
+
+        button = self.wait.until(
+            EC.presence_of_element_located(self.REGISTER_BUTTON)
         )
-
-        # Klik pakai JavaScript supaya tidak kena element click intercepted
         self.driver.execute_script("arguments[0].click();", button)
 
     def get_message(self):
         try:
-            return self.wait.until(
+            message_element = self.wait.until(
                 EC.visibility_of_element_located(self.MESSAGE)
-            ).text
+            )
+            return message_element.text
         except TimeoutException:
             return ""
+        except StaleElementReferenceException:
+            try:
+                message_element = self.wait.until(
+                    EC.visibility_of_element_located(self.MESSAGE)
+                )
+                return message_element.text
+            except Exception:
+                return ""
 
     def get_alert_text_if_exists(self):
         try:
@@ -55,14 +85,34 @@ class RegisterPage(BasePage):
 
     def is_field_invalid(self, locator):
         try:
-            element = self.find(locator)
-            class_value = element.get_attribute("class")
-            validation_message = element.get_attribute("validationMessage")
+            element = self.wait.until(
+                EC.presence_of_element_located(locator)
+            )
+
+            class_value = element.get_attribute("class") or ""
+            validation_message = element.get_attribute("validationMessage") or ""
 
             return (
                 "is-invalid" in class_value
                 or validation_message != ""
             )
+
+        except StaleElementReferenceException:
+            try:
+                element = self.wait.until(
+                    EC.presence_of_element_located(locator)
+                )
+
+                class_value = element.get_attribute("class") or ""
+                validation_message = element.get_attribute("validationMessage") or ""
+
+                return (
+                    "is-invalid" in class_value
+                    or validation_message != ""
+                )
+            except Exception:
+                return False
+
         except Exception:
             return False
 

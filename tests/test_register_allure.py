@@ -18,22 +18,13 @@ class TestRegisterAllure:
     def test_register_from_csv_with_allure(self, driver, row):
         page = RegisterPage(driver)
 
-        with allure.step("Membuka halaman Register"):
-            page.navigate()
-
-        with allure.step("Mengisi form registrasi"):
-            page.type(page.FIRST_NAME, row["first_name"])
-            page.type(page.LAST_NAME, row["last_name"])
-            page.type(page.USERNAME, row["username"])
-            page.type(page.PASSWORD, row["password"])
-
-        with allure.step("Klik tombol Register"):
-            button = page.find(page.REGISTER_BUTTON)
-            driver.execute_script(
-                "arguments[0].scrollIntoView({block: 'center'});",
-                button
+        with allure.step("Melakukan registrasi berdasarkan data CSV"):
+            page.register(
+                row["first_name"],
+                row["last_name"],
+                row["username"],
+                row["password"]
             )
-            driver.execute_script("arguments[0].click();", button)
 
         with allure.step("Mengambil hasil aktual"):
             expected = row["expected"]
